@@ -1,16 +1,17 @@
-﻿cmake_minimum_required(VERSION 3.16)
+﻿cmake_minimum_required(VERSION 3.29)
 project ("xls_search")
 
 set (CMAKE_CXX_STANDARD 20)
-set (CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_executable (xls_search 
-	"xls_search.cpp" 
-	"libxls/src/endian.c"
-	"libxls/src/locale.c"
-	"libxls/src/ole.c"
-	"libxls/src/xls.c"	 
-	"libxls/src/xlstool.c"
-)
+
+FILE(GLOB_RECURSE LIBXLS_SOURCES "libxls/src/*.c")
+list(FILTER LIBXLS_SOURCES EXCLUDE REGEX ".*xls2csv\.c")
+add_library(libxls ${LIBXLS_SOURCES})
+target_include_directories(libxls PUBLIC ".")
+
+
+FILE(GLOB APP_SOURCES "*.cpp")
+add_executable(xls_search ${APP_SOURCES})
 target_include_directories(xls_search PUBLIC "libxls/include")
-target_include_directories(xls_search PUBLIC ".")
+target_precompile_headers(xls_search  PUBLIC "precompile.h")
+target_link_libraries(xls_search libxls)
